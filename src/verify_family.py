@@ -72,13 +72,47 @@ for gamma in range(4,256):
                  "kernel_sum":f"{s:02X}","scalar":f"{beta:02X}",
                  "scalar_order":scalar_order(beta),"projective_order":e})
 # One representative per coset gamma+V.
-cosets=[r for r in rows if int(r["gamma"],16)%4==0]
-dist=Counter(r["scalar_order"] for r in cosets)
-expected={5:2,15:1,17:3,51:12,85:12,255:33}
-assert dict(sorted(dist.items()))==expected
-with open("gamma_family.csv","w",newline="") as f:
-    w=csv.DictWriter(f,fieldnames=rows[0].keys()); w.writeheader(); w.writerows(rows)
-summary={"admissible_parameters":252,"distinct_cosets":63,"projective_order":4,
-         "scalar_order_distribution":{str(k):v for k,v in sorted(dist.items())}}
+cosets = [r for r in rows if int(r["gamma"], 16) % 4 == 0]
+
+dist_cosets = Counter(r["scalar_order"] for r in cosets)
+dist_parameters = Counter(r["scalar_order"] for r in rows)
+
+expected_cosets = {
+    5: 2,
+    15: 1,
+    17: 3,
+    51: 12,
+    85: 12,
+    255: 33,
+}
+
+expected_parameters = {
+    5: 8,
+    15: 4,
+    17: 12,
+    51: 48,
+    85: 48,
+    255: 132,
+}
+
+assert dict(sorted(dist_cosets.items())) == expected_cosets
+assert dict(sorted(dist_parameters.items())) == expected_parameters
+
+with open("gamma_family.csv", "w", newline="") as f:
+    w = csv.DictWriter(f, fieldnames=rows[0].keys())
+    w.writeheader()
+    w.writerows(rows)
+
+summary = {
+    "admissible_parameters": 252,
+    "distinct_cosets": 63,
+    "projective_order": 4,
+    "scalar_order_distribution_cosets": {
+        str(k): v for k, v in sorted(dist_cosets.items())
+    },
+    "scalar_order_distribution_parameters": {
+        str(k): v for k, v in sorted(dist_parameters.items())
+    },
+}
 with open("family_summary.json","w") as f: json.dump(summary,f,indent=2,sort_keys=True)
 print(json.dumps(summary,sort_keys=True))

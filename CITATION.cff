@@ -10,7 +10,7 @@ authors:
 version: 1.0.1
 date-released: 2026-07-30
 license: MIT
-repository-code: "https://github.com/USERNAME/dyadic-cauchy-shear-screening"
+repository-code: "https://github.com/Svetlana-Grigoryan/dyadic-cauchy-shear-screening"
 keywords:
   - dyadic matrix
   - Cauchy-MDS matrix

@@ -2,6 +2,8 @@
 
 Reproducibility repository for the manuscript **Four-step projective recurrence in a dyadic Cauchy--MDS shear layer** by Sergo A. Episkoposian and Svetlana A. Grigoryan.
 
+The manuscript is not distributed in this repository. This repository contains the reproducibility code, machine-readable results, solver logs, and metadata supporting the article.
+
 ## Scientific scope
 
 The manuscript proves a family-level four-step scalar recurrence for a shear-coupled dyadic kernel over characteristic two and studies a dyadic Cauchy-MDS instance over the AES field. The repository contains the exact computations that are explicitly marked as computational in the paper. It does not claim a complete cipher design or complete nonlinear cryptanalysis.
