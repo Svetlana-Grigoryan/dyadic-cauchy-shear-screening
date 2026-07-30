@@ -1,0 +1,1224 @@
+\documentclass[10pt,reqno]{amsart}
+\usepackage{amsmath,amssymb,amsfonts,mathtools,mathrsfs,amsthm}
+\usepackage{graphicx,booktabs,tabularx,array,longtable,enumitem,url,xcolor}
+\usepackage{listings}
+\usepackage[colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue]{hyperref}
+\usepackage[nameinlink,noabbrev]{cleveref}
+\lstdefinestyle{python}{language=Python,basicstyle=\ttfamily\scriptsize,
+keywordstyle=\bfseries,commentstyle=\itshape,numbers=left,numberstyle=\tiny,
+numbersep=6pt,breaklines=true,showstringspaces=false,frame=single,columns=fullflexible}
+\lstset{style=python}
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{remark}\newtheorem{remark}[theorem]{Remark}
+\theoremstyle{definition}\newtheorem{definition}[theorem]{Definition}
+\newcommand{\F}{\mathbb F}
+\newcommand{\ord}{\operatorname{ord}}
+\newcommand{\rank}{\operatorname{rank}}
+\newcommand{\wt}{\operatorname{wt}}
+\newcommand{\per}{\operatorname{per}}
+\newcommand{\Fix}{\operatorname{Fix}}
+\newcommand{\hex}[1]{\mathtt{#1}}
+\newcommand{\Bn}{\mathcal B}
+\newcommand{\WH}{\mathrm{XOR}}
+\newcommand{\AES}{\mathrm{AES}}
+\newcommand{\PGL}{\operatorname{PGL}}
+\newcommand{\GL}{\operatorname{GL}}
+\raggedbottom
+\emergencystretch=3em
+\begin{document}
+\title[Projective recurrence in a dyadic Cauchy--MDS layer]{Four-step projective recurrence in a dyadic Cauchy--MDS shear layer}
+\author{Sergo A. Episkoposian}
+\address{Department of Applied Mathematics and Physics, National Polytechnic University of Armenia, Yerevan, Armenia}
+% Corresponding-author e-mail is supplied in the submission system.
+\author{Svetlana A. Grigoryan}
+\address{Department of Applied Mathematics and Physics, National Polytechnic University of Armenia, Yerevan, Armenia}
+\date{}
+\subjclass[2020]{Primary 94A60; Secondary 11T71, 15A21, 68P25}
+\keywords{dyadic matrix, Cauchy--MDS matrix, diffusion layer, finite fields, Jordan form, projective recurrence, truncated differential}
+\begin{abstract}
+We classify a parameterized family of 128-bit linear operators over the AES field.  The local map is the dyadic Cauchy matrix
+\(M^{(\gamma)}_{u,v}=(\gamma+u+v)^{-1}\) on \(V=\mathbb F_2^2\), and four copies are coupled by the shear \(\sigma(i,j)=(i,j\oplus i)\).  The dyadic indexing is classical; the contribution begins with the full shear--mix operator.  We prove superregularity and differential and linear branch number five.  More generally, for every kernel \(h:V\to K\) over a field of characteristic two, the associated shear-coupled operator satisfies \(L_h^4=s(h)^4I\), where \(s(h)=\sum_{a\in V}h(a)\).  Thus every admissible Cauchy parameter has projective order four.  For \(\gamma=\mathtt{04}\), we determine the inverse, Jordan form, exact vector periods and populations; in particular, \(L^4=\mathtt{D8}I\) and the periods are \(51,102,204\).  Two independent optimization models give the exact value \(25\) in an explicitly defined MDS-support relaxation, not an asserted AES S-box trail.  Restricted AES DDT/LAT compatibility tests and reproducible certificates form a diagnostic case study.  The short projective recurrence is a warning requiring nonlinear subspace and unrestricted value-aware analysis before cipher integration.
+\end{abstract}
+\maketitle
+\section{Introduction}
+Linear diffusion layers are commonly optimized through local criteria such as branch number and circuit cost.  These criteria are necessary but do not determine the recurrence, invariant subspaces, projective returns, or compatibility of a full state transformation with a concrete nonlinear layer.  We therefore study a structured 128-bit operator as an algebraic and computational diagnostic case study, not as a ready-to-deploy cipher component.
+
+Matrices of the form
+\[
+D_{u,v}=d_{u\oplus v}
+\]
+are called \emph{dyadic matrices} in the standard terminology.  Their compact signature-row description and their applications to codes and cryptographic diffusion have been studied previously; in particular, Berger gave generic constructions and implementation-oriented results for dyadic MDS matrices \cite{Berger2014}, while broader surveys place dyadic, circulant, recursive, involutory, and low-cost MDS constructions in the established literature \cite{GuptaPandeyRay2019,JunodVaudenay2004}.  Quasi-dyadic matrices use dyadic blocks and occur prominently in coding theory \cite{MartinezPllahaKelley2025}.  Recent AMC work also treats exhaustive constructions of MDS and involutory MDS matrices, generalized Cauchy families, direct MDS/NMDS constructions, and optimized XOR-cost metrics \cite{Kumar2025,MousaviEsmaeiliGulliver2025,GuptaPandeySamanta2026,Wang2022,Wang2023}.  Accordingly, this paper does not claim novelty for XOR indexing, dyadic matrices, Cauchy matrices, local MDS construction, or implementation efficiency.
+
+The local family considered here is
+\[
+M^{(\gamma)}_{u,v}=(\gamma+u+v)^{-1},\qquad u,v\in V=\F_2^2,
+\qquad \gamma\notin V.
+\]
+It is a dyadic Cauchy family.  Four copies act on the state columns and are coupled by the shear permutation \(\sigma(i,j)=(i,j\oplus i)\).  The new object of study is the resulting full shear--mix operator, whose recurrence is not determined by local MDS behavior alone.
+
+The first contribution is a family-level recurrence theorem.  For an arbitrary dyadic kernel \(h:V\to K\) over any field \(K\) of characteristic two, the shear-coupled operator satisfies
+\[
+L_h^4=s(h)^4I,\qquad s(h)=\sum_{a\in V}h(a).
+\]
+For the Cauchy family, \(s(h)\ne0\), and exact enumeration over the \(63\) cosets \(\gamma+V\subset\F_{2^8}\setminus V\) shows that the projective order is always exactly four.  Hence changing \(\gamma\) cannot remove the short projective recurrence while the shear and dyadic architecture are retained.
+
+For the representative \(\gamma=\mathtt{04}\), we then determine the inverse, minimal and characteristic polynomials, Jordan form, exact periods, fixed-space dimensions, and period populations.  The relation \(L^4=\mathtt{D8}I\) is therefore interpreted as a structural warning rather than an advantage: every \(\F_{2^8}\)-linear subspace returns projectively after four applications even though nonzero vectors have periods \(51\), \(102\), or \(204\).
+
+The computational part is deliberately stratified.  Two independent optimization formulations prove the value \(25\) only in an abstract branch-number-five support relaxation determined by the column partition and shear.  A separate verifier checks the printed witness.  Exact AES S-box calculations exclude a restricted diagonal DDT/LAT orbit class, but do not replace unrestricted DDT/LAT/BCT or nonlinear subspace-trail analysis.  A machine-readable screening record labels each item as analytically proved, independently computed, or not established.
+
+The paper's novelty is thus the exact family-level recurrence theorem and a reproducible algebraic-computational classification of a shear-coupled dyadic Cauchy operator.  It is not a claim that the local dyadic matrix is new, that the layer is implementation-optimal, or that the corresponding SPN is secure.  Those distinctions align the contribution with the algebraic, coding-theoretic, and computational scope of \emph{Advances in Mathematics of Communications}.
+\section{Field model and state serialization}
+Let
+\[
+\F=\F_{2^8}=\F_2[z]/(z^8+z^4+z^3+z+1).
+\]
+All byte constants in the manuscript are hexadecimal. Elements are represented by bytes $\hex{00},\ldots,\hex{FF}$ in the polynomial basis $1,z,\ldots,z^7$. Addition is XOR and multiplication is reduced modulo $\hex{11B}$, as in AES \cite{FIPS197,DaemenRijmen2002,DaemenRijmenWide2001}.
+
+The state is
+\[
+X=(x_{i,j})_{i,j\in V}\in\F^{4\times4},\qquad V=\F_2^2=\{\hex{00},\hex{01},\hex{02},\hex{03}\}.
+\]
+With the fixed polynomial basis and row-major byte serialization, $\F^{16}\cong\F_2^{128}$.
+
+\begin{definition}
+For $x\in\F^m$, the byte weight is $\wt_{\rm b}(x)=\#\{i:x_i\ne0\}$. For an invertible $T:\F^m\to\F^m$,
+\[
+\Bn_{\rm d}(T)=\min_{x\ne0}\bigl(\wt_{\rm b}(x)+\wt_{\rm b}(Tx)\bigr).
+\]
+The linear branch number is defined analogously for the adjoint mask transformation.
+\end{definition}
+
+\begin{definition}[Exact-return invariants]\label{def:return-invariants}
+Let $T\in\mathrm{GL}(n,2)$ and let $x\ne0$. Its exact vector period is
+\[
+\operatorname{per}_T(x)=\min\{e\ge1:T^ex=x\}.
+\]
+We define
+\[
+p_{\min}(T)=\min_{x\ne0}\operatorname{per}_T(x),
+\qquad
+N_e(T)=\#\{x\ne0:\operatorname{per}_T(x)=e\},
+\]
+\[
+\Delta_h(T)=\#\{x\ne0:\operatorname{per}_T(x)\le h\},
+\qquad
+\rho_h(T)=\frac{\Delta_h(T)}{2^n-1}.
+\]
+All dimensions are labelled explicitly by their ground field. Unless stated otherwise, fixed-space dimensions computed from the binary representative are over $\mathbb F_2$.
+\end{definition}
+
+\section{Dyadic Cauchy--MDS matrix}\label{sec:walsh-meaning}
+\subsection{Modular XOR-convolution interpretation}
+Let $K$ be a field of characteristic two and let $V=\F_2^m$. For a kernel $h:V\to K$, define the XOR-convolution
+\[
+(C_hx)(u)=\sum_{v\in V}h(u\oplus v)x(v).
+\]
+Its matrix in the standard basis is constant on XOR displacements and represents multiplication by $h$ in the group algebra $K[V]$.
+
+A crucial characteristic-two qualification is required. Since $\operatorname{char}K=2$ divides $|V|=2^m$, Maschke's theorem does not apply and $K[V]$ is not semisimple. Moreover, $K^\times$ has no nontrivial element of order two: $t^2=1$ implies $(t+1)^2=0$ and hence $t=1$. Consequently, the ordinary Walsh diagonalization by $\{\pm1\}$-valued characters, valid over coefficient fields of characteristic different from two, is not available here. The term ``XOR-indexed'' therefore refers only to the displacement rule and group-algebra multiplication; it does not assert a Walsh spectral decomposition. The nilpotent parts and nontrivial Jordan blocks obtained below are precisely the appropriate modular replacement for a nonexistent character diagonalization.
+
+Define the kernel sum
+\begin{equation}
+ s(h)=\sum_{a\in V}h(a).
+ \label{eq:kernel-sum}
+\end{equation}
+For the elementary abelian group $V$ in characteristic two,
+\begin{equation}
+ C_h^2=s(h)^2I.
+ \label{eq:scalar-square}
+\end{equation}
+Indeed, the coefficient of a nonzero displacement $d$ in the convolution square is
+\[
+\sum_{a\in V}h(a)h(a\oplus d).
+\]
+Translation by $d$ partitions $V$ into two-element orbits $\{a,a\oplus d\}$; the two contributions from each orbit are equal and cancel in characteristic two. At displacement zero the coefficient is $\sum_a h(a)^2=s(h)^2$ by Frobenius linearity.
+
+\subsection{A family-level shear recurrence}
+For \(x:V\times V\to K\), define
+\begin{equation}
+(L_hx)(i,j)=\sum_{a\in V}h(a)x(i+a,j+i).
+\label{eq:general-shear-operator}
+\end{equation}
+This is precisely dyadic mixing in the first coordinate followed by the shear \((i,j)\mapsto(i,j+i)\).
+
+\begin{theorem}[Universal four-step scalar recurrence]\label{thm:universal-recurrence}
+Let \(K\) have characteristic two and \(V=\F_2^2\).  For every kernel \(h:V\to K\),
+\begin{equation}
+L_h^4=s(h)^4I,\qquad s(h)=\sum_{a\in V}h(a).
+\label{eq:universal-L4}
+\end{equation}
+If \(s(h)\ne0\), then \(L_h\) is invertible and its projective order divides four.
+\end{theorem}
+\begin{proof}
+Two applications of \eqref{eq:general-shear-operator} give
+\[
+(L_h^2x)(i,j)=\sum_{a,d\in V}h(a)h(a+d)x(i+d,j+a).
+\]
+Consequently, the coefficient of \(x(i+r,j+t)\) in \(L_h^4x(i,j)\) is
+\[
+K(r,t)=\sum_{a,d\in V}h(a)h(a+d)h(a+t)h(a+t+r+d).
+\]
+For \((r,t)=(0,0)\),
+\[
+K(0,0)=\Bigl(\sum_a h(a)^2\Bigr)^2=s(h)^4.
+\]
+Suppose \((r,t)\ne(0,0)\).  The summands are paired by a fixed-point-free translation of \((a,d)\): use \((a,d)\mapsto(a,d+t)\) when \(r=0\), \((a,d)\mapsto(a,d+r)\) when \(t=0\), \((a,d)\mapsto(a+r,d+r)\) when \(r=t\ne0\), and \((a,d)\mapsto(a,d+r+t)\) when \(r,t\) are distinct nonzero elements of \(V\).  In each case the four arguments of \(h\) are merely permuted.  Equal paired summands cancel in characteristic two, so \(K(r,t)=0\).  This proves \eqref{eq:universal-L4}.  If \(s(h)\ne0\), the fourth power is invertible, hence so is \(L_h\), and its image in \(\PGL\) has order dividing four.
+\end{proof}
+
+\subsection{General construction}
+Let $V\subset\F$ be a finite $\F_2$-subspace and let $\gamma\notin V$. Define
+\begin{equation}
+M^{(V,\gamma)}_{u,v}=(\gamma+u+v)^{-1},\qquad u,v\in V.
+\label{eq:generalM}
+\end{equation}
+Because $u+v=u\oplus v$, the coefficient depends only on the XOR displacement of the indices, so $M^{(V,\gamma)}$ is a dyadic convolution matrix in the sense defined above.
+
+\begin{theorem}[MDS property]\label{thm:mds}
+Every square submatrix of $M^{(V,\gamma)}$ is nonsingular. If $|V|=4$, then
+\[
+\Bn_{\rm d}(M)=\Bn_{\rm l}(M)=5.
+\]
+\end{theorem}
+\begin{proof}
+Put $x_u=u$ and $y_v=\gamma+v$. The two node sets are disjoint: $x_u=y_v$ would imply $\gamma=u+v\in V$. Every square submatrix is therefore a Cauchy matrix. For row indices $u_1,\ldots,u_k$ and column indices $v_1,\ldots,v_k$, its determinant is
+\begin{equation}
+\det\left(\frac1{x_{u_i}+y_{v_j}}\right)_{i,j=1}^k
+=
+\frac{\prod_{i<j}(x_{u_i}+x_{u_j})\prod_{i<j}(y_{v_i}+y_{v_j})}
+{\prod_{i,j}(x_{u_i}+y_{v_j})},
+\end{equation}
+where subtraction equals addition in characteristic two. All factors are nonzero. Thus $M$ is superregular.  The systematic generator matrix $[I_4\mid M]$ therefore generates an $[8,4,5]$ MDS code, and the differential branch number is five.  Transposition preserves all square minors.  Moreover, Jacobi's complementary-minor identity shows that every square minor of $M^{-1}$ is, up to a nonzero scalar factor, a complementary minor of $M$; hence $M^{-1}$, $M^T$, and $M^{-T}$ are also superregular.  Mask propagation is governed by $M^{-T}$, so its branch number is also five. \end{proof}
+
+\begin{proposition}[The full Cauchy parameter family]\label{prop:gamma-family}
+Let \(V=\{\mathtt{00},\mathtt{01},\mathtt{02},\mathtt{03}\}\subset\F_{2^8}\), and let
+\(h_\gamma(a)=(\gamma+a)^{-1}\) for \(\gamma\notin V\).  Then \(s(h_\gamma)\ne0\),
+\[
+L_\gamma^4=s(h_\gamma)^4I,
+\]
+and the projective order of \(L_\gamma\) is exactly four for every admissible \(\gamma\).  The \(252\) parameters form \(63\) cosets modulo \(V\), and the scalar recurrence is constant on each coset. Parameters in one coset are related by row or column translation permutations, not by permutation similarity.
+\end{proposition}
+\begin{proof}
+Let \(P_V(X)=\prod_{v\in V}(X+v)\).  Since \(V\) is an \(\F_2\)-subspace, \(P_V\) is a linearized polynomial of the form \(X^4+aX^2+bX\), where \(b=\prod_{v\in V\setminus\{0\}}v\ne0\).  Therefore
+\[
+s(h_\gamma)=\sum_{v\in V}\frac1{\gamma+v}
+=\frac{P_V'(\gamma)}{P_V(\gamma)}=\frac{b}{P_V(\gamma)}\ne0.
+\]
+The scalar recurrence follows from Theorem~\ref{thm:universal-recurrence}. If \(t\in V\), then \(h_{\gamma+t}(a)=h_\gamma(a+t)\), so \(M_{\gamma+t}=P_tM_\gamma=M_\gamma P_t\), where \(P_t\) is the translation permutation. This is row/column permutation equivalence and must not be confused with similarity, since \(P_tM_\gamma P_t^{-1}=M_\gamma\). In particular, \(s(h_{\gamma+t})=s(h_\gamma)\). To avoid using this equivalence for a stronger spectral conclusion, Supplementary Material S1 enumerates all \(252\) admissible parameters directly and verifies that \(L_\gamma^2\) is nonscalar in every case. Hence the projective order is neither one nor two and, by Theorem~\ref{thm:universal-recurrence}, is exactly four.
+\end{proof}
+
+\begin{table}[t]
+\centering
+\caption{Distribution of \(\operatorname{ord}(s(h_\gamma)^4)\) over all \(252\) admissible parameters.  Every corresponding full operator has projective order four.}
+\label{tab:gamma-family}
+\begin{tabular}{c@{\qquad}rrrrrr}
+\toprule
+Scalar order & 5 & 15 & 17 & 51 & 85 & 255\\
+Number of parameters & 8 & 4 & 12 & 48 & 48 & 132\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Explicit matrix}
+For $V=\{0,1,2,3\}$ and $\gamma=\hex{04}$,
+\[
+h_a=(\gamma+a)^{-1},\qquad
+(h_0,h_1,h_2,h_3)=(\hex{CB},\hex{52},\hex{7B},\hex{D1}),
+\]
+and
+\[
+M=\begin{pmatrix}
+\hex{CB}&\hex{52}&\hex{7B}&\hex{D1}\\
+\hex{52}&\hex{CB}&\hex{D1}&\hex{7B}\\
+\hex{7B}&\hex{D1}&\hex{CB}&\hex{52}\\
+\hex{D1}&\hex{7B}&\hex{52}&\hex{CB}
+\end{pmatrix}.
+\]
+The analytic Cauchy argument already proves that all $69$ square minors are nonzero. Appendix~A independently enumerates them as a consistency check and verifies
+\[
+M^2=\hex{72}I_4,\qquad M^{-1}=\hex{97}M,
+\]
+where $\hex{97}=\hex{72}^{-1}$. Thus the inverse may reuse the same coefficient pattern followed by componentwise multiplication of all four output bytes by $\hex{97}$---one constant-field multiplication per output byte unless the scalar is absorbed into the inverse coefficients. This identity is algebraic and does not by itself imply a smaller circuit.
+\section{The full dyadic Cauchy--shear layer}
+Apply $M$ independently to the four columns and then apply
+\[
+\sigma(i,j)=(i,j\oplus i).
+\]
+Thus
+\[
+L_{\mathrm{D}}=\Sigma_{\mathrm{sh}}\circ \operatorname{Mix}_M.
+\]
+The bit-level representative is a $128\times128$ binary matrix obtained from the stated field basis and row-major byte order. Every reported rank and period refers to this fixed serialization.
+
+\begin{lemma}[Proper bundle dispersion]\label{lem:proper}
+The permutation $\sigma$ maps the four bytes of every input column to four distinct output columns.
+\end{lemma}
+\begin{proof}
+For a fixed input column $j$, the destination columns are $j\oplus i$ for $i\in V$. XOR by $j$ is a permutation of $V$, so the four destinations are distinct.
+\end{proof}
+
+\begin{proposition}[Structural separator]\label{prop:structural-separator}
+Let $C_h$ be an invertible pure dyadic convolution on $K^{\F_2^m}$. The scalar-square identity $C_h^2=s(h)^2I$ implies that its projective order divides two. Consequently, any invertible operator $T$ satisfying
+\begin{equation}
+T^2\notin K^\times I
+\label{eq:not-pure-convolution}
+\end{equation}
+cannot itself be a pure dyadic convolution. In particular, the full dyadic shear-coupled layer $L_{\mathrm{D}}=\Sigma_{\mathrm{sh}}C_h$, whose square is nonscalar, lies outside the pure-convolution class.
+\end{proposition}
+\begin{proof}
+If $T=C_h$ were a pure invertible convolution, the scalar-square identity would imply $T^2=s(h)^2I$, contradicting \eqref{eq:not-pure-convolution}. For the Cauchy family, Proposition~\ref{prop:gamma-family} gives exact projective order four.
+\end{proof}
+
+The proposition identifies the source of the nontrivial projective dynamics. The local Cauchy--MDS matrix alone belongs to a projective-order-two class; the order-four behavior of the complete layer is produced by its interaction with the global permutation $\Sigma_{\mathrm{sh}}$. Thus the nontrivial projective behavior arises from the interaction between convolution and the shear permutation; it is not a property of the local Cauchy matrix alone.
+\section{Complete Jordan and orbit classification of the dyadic Cauchy--shear layer}
+\label{sec:concrete-jordan}
+For the explicit kernel,
+\[
+c=s(h)=\hex{33},\qquad c^2=\hex{72},\qquad c^4=\hex{D8}.
+\]
+Exact finite-field exponentiation gives
+\[
+\ord_{\F_{2^8}^\times}(\hex{33})
+=
+\ord_{\F_{2^8}^\times}(\hex{D8})=51.
+\]
+Theorem~\ref{thm:universal-recurrence} gives analytically
+\begin{equation}
+L_{\mathrm{D}}^4=\hex{D8}I_{16}.
+\label{eq:L4}
+\end{equation}
+Define
+\[
+U=\hex{33}^{-1}L_{\mathrm{D}},\qquad N=U-I.
+\]
+Then $U^4=I$ and $N^4=0$.  This nilpotency bound is analytic.  The exact block multiplicities are determined from the independently reproduced nullity profile below; the subsequent period formulas are analytic consequences of that profile.
+
+\begin{theorem}[Jordan form from a certified nullity profile]\label{thm:WH-jordan}
+Over $\F_{2^8}$,
+\begin{equation}
+U\sim J_4(1)^{\oplus4},
+\qquad
+L_{\mathrm{D}}\sim J_4(\hex{33})^{\oplus4}.
+\label{eq:WH-jordan}
+\end{equation}
+Hence
+\[
+m_U(X)=(X-1)^4,\quad \chi_U(X)=(X-1)^{16},
+\]
+and
+\[
+m_{L_{\mathrm{D}}}(X)=(X-\hex{33})^4,\quad
+\chi_{L_{\mathrm{D}}}(X)=(X-\hex{33})^{16}.
+\]
+\end{theorem}
+\begin{proof}
+The independently checkable binary rank certificate gives
+\[
+\operatorname{rank}_{\F_2}(L_{\mathrm{D}}^{51}-I)=96,
+\qquad
+\dim_{\F_2}\ker(L_{\mathrm{D}}^{51}-I)=32.
+\]
+The certificate stores the full $128\times128$ binary matrix, the row-reduced rank result, and its SHA-256 digest; thus this single computational input to the Jordan classification can be reproduced without trusting any printed intermediate value.
+Since $\hex{33}^{51}=1$ and $51\equiv3\pmod4$,
+\[
+L_{\mathrm{D}}^{51}=U^3.
+\]
+Writing $U=I+N$ gives
+\[
+U^3-I=N+N^2+N^3=N(I+N+N^2).
+\]
+The factor $I+N+N^2$ is invertible because it is the identity plus a nilpotent operator. Therefore
+\[
+\ker(L_{\mathrm{D}}^{51}-I)=\ker N.
+\]
+The state space has dimension $16$ over $\F_{2^8}$ and dimension $128$ over $\F_2$; hence the displayed binary kernel dimension $32$ equals field dimension $32/8=4$. A $16$-dimensional unipotent operator with nilpotency index at most four and exactly four Jordan blocks must consist of four blocks of size four. Multiplication by $\hex{33}$ gives the second form.
+\end{proof}
+
+\begin{corollary}[Analytic exact-period spectrum]\label{thm:WHspectrum}
+The nonzero vector periods of $L_{\mathrm{D}}$ are exactly
+\[
+\{51,102,204\}.
+\]
+Their populations are
+\[
+N_{51}=2^{32}-1,\qquad
+N_{102}=2^{64}-2^{32},\qquad
+N_{204}=2^{128}-2^{64}.
+\]
+Moreover,
+\[
+\ord(L_{\mathrm{D}})=204,
+\qquad
+\ord_{\mathrm{PGL}}([L_{\mathrm{D}}])=4.
+\]
+\end{corollary}
+\begin{proof}
+For four blocks $J_4(1)$,
+\[
+\dim_{\F_{2^8}}\ker N=4,
+\qquad
+\dim_{\F_{2^8}}\ker N^2=8.
+\]
+Since the scalar part has odd order $51$ and the normalized unipotent part has periods $1$, $2$, and $4$, the periods are $51$, $102$, and $204$; counting the nested kernels gives the stated populations.
+\end{proof}
+
+\begin{remark}[Interpretation]
+The minimum period $51$ is larger than the minimum period of the isolated AES reference under the stated serialization, but it is not called ``long'' in an absolute $128$-bit sense. Its factor $51$ is entirely scalar. The nonscalar normalized dynamics has order four and Jordan type $J_4(1)^{\oplus4}$.
+\end{remark}
+
+\begin{remark}[The role of horizon 50]
+The identity $\Delta_h(L_{\mathrm{D}})=0$ for $1\le h\le50$ is merely a corollary of the exact minimum period $51$; horizon $50$ is not introduced as an independently motivated design constant. Comparative tables report the complete period spectrum and, when finite horizons are useful, use the predetermined set
+\[
+\{16,32,64,128,256\}.
+\]
+\end{remark}
+
+\section{Serialization-matched AES reference computation}
+Let $L_{\AES}=\operatorname{MixColumns}\circ\operatorname{ShiftRows}$ denote the isolated unkeyed AES diffusion operator in the FIPS~197 state convention \cite{FIPS197}. A matrix power is meaningful only when input and output use the same coordinates. We therefore use row-major coordinates on both sides: vector bytes are placed as $x_{i,j}=b_{4i+j}$, ShiftRows and MixColumns are applied, and the result is exported in the same row-major order $(x_{0,0},x_{0,1},\ldots,x_{3,3})$. This representation is related to the FIPS column-major listing by one fixed permutation similarity, so operator order and fixed-space dimensions are unchanged. The mixed input/output convention is not used. As a serialization test vector, the input bytes $b_k=k$ are loaded as
+\[
+\begin{pmatrix}
+00&01&02&03\\04&05&06&07\\08&09&0A&0B\\0C&0D&0E&0F
+\end{pmatrix},
+\]
+and the supplementary verifier checks the resulting ShiftRows and MixColumns output byte by byte. Under this explicitly fixed convention,
+\[
+L_{\AES}^8=I,
+\]
+and exact ranks give
+\[
+f_1=16,\qquad f_2=32,\qquad f_4=64,\qquad f_8=128.
+\]
+
+\begin{theorem}\label{thm:AESspectrum}
+The nonzero AES vector periods are exactly $\{1,2,4,8\}$, with
+\[
+N_1=2^{16}-1,
+\]
+\[
+N_2=2^{32}-2^{16},\qquad
+N_4=2^{64}-2^{32},\qquad
+N_8=2^{128}-2^{64}.
+\]
+Thus $p_{\min}(L_{\AES})=1$ and $\Delta_h(L_{\AES})=2^{128}-1$ for every $h\ge8$.
+\end{theorem}
+
+For horizons $8\le h\le50$,
+\[
+\Delta_h(L_{\mathrm{D}})=0,
+\qquad
+\Delta_h(L_{\AES})=2^{128}-1,
+\]
+and therefore
+\[
+\rho_{50}(L_{\mathrm{D}})=0,
+\qquad
+\rho_{50}(L_{\AES})=1.
+\]
+These equalities compare two isolated unkeyed linear operators under one serialization. It is not a statement about a complete AES round, which also contains SubBytes and AddRoundKey, nor does it identify a weakness of AES or establish a security advantage for a complete cipher using $L_{\mathrm{D}}$.
+
+\section{Vector periods versus subspace returns}
+\begin{proposition}\label{prop:subspace}
+If an $\F$-linear operator satisfies $L^m=\beta I$ with $\beta\in\F^*$, then every $\F$-linear subspace $U$ satisfies $L^m(U)=U$.
+\end{proposition}
+\begin{proof}
+Scalar multiplication by a nonzero field element maps every $\F$-linear subspace onto itself. Hence $L^m(U)=\beta U=U$. \end{proof}
+
+Applied to \eqref{eq:L4}, every $\F_{2^8}$-linear subspace returns within four steps. Consequently, nonlinear subspace-trail analysis is a mandatory validation stage for any future keyed round function using this layer, rather than an optional implementation detail. In particular, a vector can have period $204$ while the line it spans has projective period dividing four. This distinction prevents an incorrect inference from larger exact vector cycles to resistance against invariant-subspace or subspace-trail attacks and connects the present diagnostic to the broader literature on invariant subspaces and structural distinguishers \cite{BeierleCanteaut2017}.
+
+\section{Normalization as a design trade-off}
+Choose $\lambda=\hex{6C}$. Since
+\[
+\lambda^2=\hex{97}=\hex{72}^{-1},
+\]
+the scaled matrix $\widetilde M=\lambda M$ satisfies
+\[
+\widetilde M^2=I_4.
+\]
+The corresponding full layer is $\widetilde L=\lambda L_{\mathrm{D}}$, because the same scalar multiplies every output byte before the byte permutation.
+
+\begin{theorem}[Involution versus scalar-extended vector periods]\label{thm:tradeoff}
+The normalized local matrix is involutory, but
+\[
+\widetilde L^4=I,
+\qquad
+\ord(\widetilde L)=4.
+\]
+Its exact fixed-space dimensions are
+\[
+\dim\ker(\widetilde L-I)=32,
+\quad
+\dim\ker(\widetilde L^2-I)=64,
+\quad
+\dim\ker(\widetilde L^4-I)=128.
+\]
+Hence $p_{\min}(\widetilde L)=1$ and $\Delta_h(\widetilde L)=2^{128}-1$ for $h\ge4$.
+\end{theorem}
+\begin{proof}
+From $\widetilde L=\lambda L_{\mathrm{D}}$ and \eqref{eq:L4},
+\begin{equation}
+\widetilde L^4=\lambda^4\hex{D8}I=I,
+\end{equation}
+where the scalar equality follows by direct substitution in $\F$ and is independently confirmed by the exact certificate. The supplementary record gives the exact ranks of $\widetilde L^e-I$ for $e=1,2,3$ and the full equality $\widetilde L^4=I$; hence the first three powers are not the identity and the order is four. The remaining claims follow from the listed exact ranks. \end{proof}
+
+The theorem quantifies a genuine co-design tension. The inverse of the unnormalized local matrix is a scalar multiple of the forward matrix, which reuses the forward coefficient pattern up to a fixed field scalar; forcing exact involution removes that scalar but collapses the full-state vector spectrum.
+
+\section{Machine-verified four-round activity in the branch-number relaxation}
+\label{sec:wide-trail}
+We fix the round direction before defining the model. An activity mask $x^{(r)}\in\{0,1\}^{16}$ records the active byte inputs to the $r$th parallel S-box layer. Between $x^{(r)}$ and $x^{(r+1)}$, the state is first mixed independently by $M$ in each column and is then permuted by
+\[
+\sigma(i,j)=(i,j\oplus i).
+\]
+The analysis in this section is a truncated support analysis. It does not impose DDT, LAT, or value-consistency constraints.
+
+\begin{lemma}[Local necessary support constraint]\label{lem:local-relaxation}
+Let $a,b\in\{0,1\}^4$ be the input and output support masks of one column under $M$. Every realizable nonzero transition satisfies
+\begin{equation}
+\operatorname{wt}(a)+\operatorname{wt}(b)\ge5.
+\label{eq:local-relaxation}
+\end{equation}
+The zero input has only the zero output.
+\end{lemma}
+\begin{proof}
+For a realizable transition choose a nonzero byte vector $u$ with support $a$ and $Mu$ with support $b$. The branch-number equality $\mathcal B(M)=5$ gives \eqref{eq:local-relaxation}. Invertibility gives the zero case.
+\end{proof}
+
+\begin{definition}[Branch-number activity relaxation]\label{def:activity-relaxation}
+For each active input column, the relaxed local transition relation allows every nonzero output mask satisfying \eqref{eq:local-relaxation}; for a zero input column it allows only the zero output. Four column relations are combined independently and followed by the exact shear permutation. This relation is an explicit superset of the support transitions realizable by field values.
+\end{definition}
+
+The word ``relaxation'' is essential. MDS branch number supplies a necessary support inequality; it does not imply that every admissible pair of masks is realized by an actual byte vector.
+
+\begin{proposition}[Coefficient independence of the relaxed model]\label{prop:coefficient-independent}
+Fix the four-column partition, the shear permutation $\sigma$, and local branch number five. The feasible graph and objective of Definition~\ref{def:activity-relaxation} are identical for every invertible $4\times4$ MDS matrix used in place of $M$. Consequently, the optimum $25$ below is a property of the abstract branch-number-five support model and the shear permutation, not of the coefficients $\mathtt{CB},\mathtt{52},\mathtt{7B},\mathtt{D1}$.
+\end{proposition}
+\begin{proof}
+The relaxation retains from the local linear map only zero-to-zero propagation and the inequality $\operatorname{wt}(a)+\operatorname{wt}(b)\ge5$. Both depend solely on invertibility and branch number. The inter-column edges are then determined solely by $\sigma$; hence neither the feasible set nor the activity objective contains a matrix coefficient.
+\end{proof}
+
+\begin{theorem}[Exact optimum of the abstract MDS-support relaxation]\label{thm:wide25}
+In the branch-number activity relaxation of Definition~\ref{def:activity-relaxation}, the minimum total support weight over four consecutive abstract layers is exactly
+\[
+\min\sum_{r=0}^{3}\operatorname{wt}(x^{(r)})=25.
+\]
+An optimal sequence, with bit position $4i+j$ representing byte $(i,j)$, is
+\begin{equation}
+(x^{(0)},x^{(1)},x^{(2)},x^{(3)})
+=(\mathtt{2800},\mathtt{5A5A},\mathtt{EEEE},\mathtt{5004}),
+\label{eq:activity-witness}
+\end{equation}
+whose layer weights are $2,8,12,3$.
+\end{theorem}
+\begin{proof}
+The lower bound is obtained from two independently written complete binary optimization models.  Each model is accompanied by a complete solver log recording the terminal status, primal objective, dual bound, and zero optimality gap. They use different variable layouts and independently generated constraint matrices, but encode the same formal relation: exact shear equalities, zero-column preservation, equivalence between a column-activity indicator and a nonzero input/output column, and the local inequality \eqref{eq:local-relaxation}. Both solvers terminate with primal objective $25$, dual bound $25$, and zero gap. A third, deliberately simpler program reads only the printed input and post-mixing masks, checks every local constraint and permutation edge, and confirms a feasible objective value $25$. Thus the two complete models establish the lower bound and the witness checker establishes the matching upper bound. Appendix~\ref{app:activity-witness} gives the intermediate masks and the release records the solver status, objective values, dependencies, and integrity hashes.
+\end{proof}
+
+\begin{remark}[What the theorem proves]
+Because the optimization is performed over a superset of realizable support transitions, its optimum is a valid lower bound for every value-compatible differential or linear trail represented by the model. Equality is proved only inside the branch-number relaxation. The mask witness \eqref{eq:activity-witness} is not asserted to lift to an actual sequence of byte differences or masks without an additional finite-field feasibility check.
+\end{remark}
+
+\begin{remark}[Dependence on the concrete layer]
+By Proposition~\ref{prop:coefficient-independent}, this four-layer number does not distinguish the proposed Cauchy coefficients from another branch-five $4\times4$ MDS matrix combined with the same shear. Its role is to validate the partition/permutation geometry and to provide a common coarse baseline for later value-aware searches.
+\end{remark}
+
+\begin{remark}[Relation to the classical wide-trail strategy]
+The value $25=5^2$ agrees with the familiar four-round wide-trail target for a branch-five local layer and a suitable inter-column permutation. We do not invoke that theorem through an unverified disjoint-group argument. Instead, for this concrete serialization and round direction, the claim is stated in the exact model that was exhaustively checked.
+\end{remark}
+
+\section{Cyclic recurrence and active-S-box characteristics}
+\subsection{A weight refinement of the fixed-space spectrum}
+The state-count invariant $\Delta_h$ distinguishes operators with many short exact returns from operators without them, but it does not distinguish a dense closed orbit from a sparse one. We therefore refine the recurrence spectrum by bundle weight.
+
+\begin{definition}[Cyclic differential activity]\label{def:cyclic-activity}
+For an invertible bundle-linear operator $T$ and an integer $e\ge1$, define
+\begin{equation}
+\mathcal A_e^{\rm d}(T)=
+\min_{\substack{x\ne0\\T^e x=x}}
+\sum_{i=0}^{e-1}\wt_{\rm b}(T^i x),
+\label{eq:cyclic-activity}
+\end{equation}
+with the convention $\mathcal A_e^{\rm d}(T)=+\infty$ when $\ker(T^e-I)=\{0\}$. Define also
+\[
+\mathcal A_{\le h}^{\rm d}(T)=\min_{1\le e\le h}\mathcal A_e^{\rm d}(T).
+\]
+For linear masks, let $T^\star=T^{-T}$ and define
+\[
+\mathcal A_e^{\rm l}(T)=\mathcal A_e^{\rm d}(T^\star),
+\qquad
+\mathcal A_{\le h}^{\rm l}(T)=\min_{1\le e\le h}\mathcal A_e^{\rm l}(T).
+\]
+\end{definition}
+
+Thus $\Delta_h(T)$ counts states on short closed linear orbits, whereas $\mathcal A_{\le h}^{\rm d}(T)$ records the least cumulative number of active bundles on such an orbit. The invariant is exact for the isolated linear dynamics and is not yet a differential characteristic of an SPN: the nonlinear layer must additionally support the required value transitions.
+
+\begin{proposition}[Global branch number]\label{prop:global-branch}
+The full dyadic Cauchy--shear operator has differential and linear bundle branch number five:
+\[
+\mathcal B_{\rm d}(L_{\mathrm{D}})=\mathcal B_{\rm l}(L_{\mathrm{D}})=5.
+\]
+\end{proposition}
+\begin{proof}
+Before the final byte permutation, the state is split into four columns and the same $4\times4$ MDS map $M$ is applied to each column. For every nonzero input column $c$, superregularity gives
+\[
+\wt_{\rm b}(c)+\wt_{\rm b}(Mc)\ge5.
+\]
+Summing over the nonzero input columns gives a lower bound of five for the complete state. Equality is attained by placing in one column an input attaining the local branch number and setting the other columns to zero. The permutation $\Sigma$ preserves byte weight. The same argument applies to masks because an MDS matrix and its adjoint mask transformation both have branch number five. \end{proof}
+
+\begin{theorem}[Branch-number lower bound for closed orbits]\label{thm:cyclic-branch-bound}
+Let $T$ be an invertible bundle-linear operator. Whenever $\ker(T^e-I)\ne\{0\}$,
+\begin{equation}
+\mathcal A_e^{\rm d}(T)
+\ge
+\left\lceil\frac{e\mathcal B_{\rm d}(T)}{2}\right\rceil.
+\label{eq:cyclic-branch}
+\end{equation}
+Likewise,
+\begin{equation}
+\mathcal A_e^{\rm l}(T)
+\ge
+\left\lceil\frac{e\mathcal B_{\rm l}(T)}{2}\right\rceil
+\label{eq:cyclic-branch-linear}
+\end{equation}
+whenever $\ker((T^\star)^e-I)\ne\{0\}$.
+\end{theorem}
+\begin{proof}
+Take $x\ne0$ with $T^e x=x$ and write $x_i=T^i x$, with indices modulo $e$. Since $T$ is invertible, every $x_i$ is nonzero. By the definition of differential branch number,
+\[
+\wt_{\rm b}(x_i)+\wt_{\rm b}(x_{i+1})\ge\mathcal B_{\rm d}(T)
+\qquad(0\le i<e).
+\]
+Summing cyclically counts each weight twice and yields
+\[
+2\sum_{i=0}^{e-1}\wt_{\rm b}(x_i)\ge e\mathcal B_{\rm d}(T).
+\]
+The left-hand side is an even integer, hence
+\[
+\sum_{i=0}^{e-1}\wt_{\rm b}(x_i)
+\ge\left\lceil e\mathcal B_{\rm d}(T)/2\right\rceil.
+\]
+Minimization over all nonzero fixed vectors of $T^e$ proves \eqref{eq:cyclic-branch}. Applying the same argument to $T^\star=T^{-T}$ proves \eqref{eq:cyclic-branch-linear}. \end{proof}
+
+\begin{corollary}[XOR--Cauchy cyclic activity]\label{cor:wh-cyclic-activity}
+For the proposed layer,
+\[
+\mathcal A_e^{\rm d}(L_{\mathrm{D}})=+\infty
+\qquad(1\le e\le50).
+\]
+For every divisor $e$ of $204$ for which a nonzero closed orbit exists,
+\[
+\mathcal A_e^{\rm d}(L_{\mathrm{D}})\ge\left\lceil\frac{5e}{2}\right\rceil.
+\]
+In particular, the branch-number bounds are $128$, $255$, and $510$ active bundle occurrences for $e=51,102,204$, respectively.
+\end{corollary}
+\begin{proof}
+The first statement follows from $\ker(L_{\mathrm{D}}^e-I)=\{0\}$ for $1\le e\le50$. The second follows from \cref{prop:global-branch,thm:cyclic-branch-bound}. \end{proof}
+
+The numerical bounds in the last corollary are lower bounds on cumulative bundle activity along closed orbits of the isolated linear map. They are not four-round wide-trail bounds and should not be compared numerically with the value $25$ without accounting for the different objects and horizons.
+
+\subsection{Restricted diagonal compatibility with the AES S-box}
+Let $S:\F\to\F$ be a bijective byte S-box, applied independently to all bundles, and consider rounds of the form $R=T\circ S$. Write $\operatorname{DDT}_S(a,b)$ for the number of values $u\in\F$ satisfying
+\[
+S(u+a)+S(u)=b.
+\]
+A closed linear orbit $x_i=T^i x_0$ becomes a differential characteristic of this SPN only under an additional compatibility condition. The cleanest direct bridge is the following explicitly restricted class.
+
+\begin{definition}[Orbit-compatible cyclic differential characteristic]\label{def:orbit-compatible}
+A nonzero closed orbit $(x_0,\ldots,x_{e-1})$ of $T$, where $x_{i+1}=Tx_i$ and $x_e=x_0$, is called \emph{DDT-diagonally compatible} with $S$ if, for every round $i$ and bundle $j$,
+\[
+\operatorname{DDT}_S((x_i)_j,(x_i)_j)>0.
+\]
+In that case the S-box output difference is chosen equal to its input difference, and the subsequent linear layer maps $x_i$ to $x_{i+1}$.
+\end{definition}
+
+\begin{theorem}[Conditional differential bridge]\label{thm:conditional-differential}
+Every DDT-diagonally compatible closed orbit of length $e$ defines a valid cyclic differential characteristic of $R=T\circ S$ with exactly
+\[
+N_{\rm act}=\sum_{i=0}^{e-1}\wt_{\rm b}(x_i)
+\]
+active S-boxes. Under the usual independent-round characteristic model, its probability is
+\begin{equation}
+\Pr(\mathcal T)=
+\prod_{i=0}^{e-1}\prod_{j:(x_i)_j\ne0}
+\frac{\operatorname{DDT}_S((x_i)_j,(x_i)_j)}{|\F|}
+\le
+(p_{\max}^{\rm d})^{N_{\rm act}},
+\label{eq:conditional-diff-prob}
+\end{equation}
+where
+\[
+p_{\max}^{\rm d}=\max_{a\ne0,b}\frac{\operatorname{DDT}_S(a,b)}{|\F|}.
+\]
+Consequently, any such characteristic satisfies
+\[
+N_{\rm act}\ge\mathcal A_e^{\rm d}(T)
+\ge\left\lceil\frac{e\mathcal B_{\rm d}(T)}2\right\rceil.
+\]
+If $\ker(T^e-I)=\{0\}$, no DDT-diagonally compatible characteristic of this orbit form exists.
+\end{theorem}
+\begin{proof}
+At round $i$, choose the bundlewise S-box transition $(x_i)_j\mapsto(x_i)_j$. The DDT compatibility assumption makes every selected transition possible. The output difference of the parallel S-box layer is therefore $x_i$, and the linear layer produces $Tx_i=x_{i+1}$. Closure follows from $x_e=x_0$. A bundle is active exactly when $(x_i)_j\ne0$, which proves the active-S-box count. Formula \eqref{eq:conditional-diff-prob} is the standard product of the selected bundle-transition probabilities in the independent-round characteristic model. The upper bound follows from the definition of $p_{\max}^{\rm d}$, and the activity bounds follow from \cref{def:cyclic-activity,thm:cyclic-branch-bound}. If $T^e$ has no nonzero fixed vector, the required closed orbit does not exist. \end{proof}
+
+There is a dual linear statement. Let $\operatorname{LAT}_S(a,b)$ be the Walsh correlation numerator for input mask $a$ and output mask $b$, and put
+\[
+c_{\max}=\max_{(a,b)\ne(0,0)}\frac{|\operatorname{LAT}_S(a,b)|}{|\F|}.
+\]
+For $T^\star=T^{-T}$, a closed orbit $\lambda_{i+1}=T^\star\lambda_i$ is LAT-diagonally compatible if every active bundle satisfies
+\[
+\operatorname{LAT}_S((\lambda_i)_j,(\lambda_i)_j)\ne0.
+\]
+
+\begin{theorem}[Conditional linear bridge]\label{thm:conditional-linear}
+Every LAT-diagonally compatible closed orbit of $T^\star$ defines a cyclic linear characteristic with
+\[
+N_{\rm act}=\sum_{i=0}^{e-1}\wt_{\rm b}(\lambda_i)
+\ge\mathcal A_e^{\rm l}(T)
+\ge\left\lceil\frac{e\mathcal B_{\rm l}(T)}2\right\rceil.
+\]
+Under the usual piling-up model for a fixed linear characteristic, its absolute correlation is at most $c_{\max}^{N_{\rm act}}$.
+\end{theorem}
+\begin{proof}
+The mask propagated backwards through $T$ is transformed by $T^{-T}:=(T^{-1})^{T}$. Hence $\lambda_{i+1}=T^{-T}\lambda_i$ synchronizes consecutive rounds. Selecting the diagonal LAT transition on every active bundle gives the claimed characteristic, while the product bound and the activity inequalities follow exactly as in \cref{thm:conditional-differential}. \end{proof}
+
+
+\subsection{Exact AES S-box diagonal-support computation}
+\label{subsec:aes-sbox-diagonal}
+For the concrete AES S-box, the diagonal differential and linear supports
+can be computed exhaustively over all $255$ nonzero byte values. Define
+\begin{align}
+D_{\rm diag}&=\{a\in\F^*: \operatorname{DDT}_S(a,a)>0\},\\
+L_{\rm diag}&=\{a\in\F^*: \operatorname{LAT}_S(a,a)\ne0\}.
+\end{align}
+The executed certificate gives
+\begin{equation}
+ |D_{\rm diag}|=116,
+ \qquad
+ \operatorname{DDT}_S(a,a)\in\{2,4\}
+ \quad(a\in D_{\rm diag}),
+ \label{eq:aes-ddt-diag-count}
+\end{equation}
+and
+\begin{equation}
+ |L_{\rm diag}|=234,
+ \qquad
+ |\operatorname{LAT}_S(a,a)|\in
+ \{4,8,12,16,20,24,28,32\}.
+ \label{eq:aes-lat-diag-count}
+\end{equation}
+
+Let $H=\langle\hex{D8}\rangle=\langle\hex{33}\rangle$ be the unique
+order-$51$ subgroup generated by the scalar recurrence. Since
+$|\F^*|=255$, the nonzero field elements split into five multiplicative
+cosets of $H$.
+
+\begin{theorem}[Absence of diagonal-compatible AES cyclic characteristics]\label{thm:aes-no-diagonal-cycles}
+For the AES S-box and the dyadic Cauchy--shear layer $L_{\mathrm{D}}$, no nonzero closed
+linear orbit of any possible exact period $51$, $102$, or $204$ is
+DDT-diagonally compatible or LAT-diagonally compatible. Hence the
+conditional constructions of Theorems~\ref{thm:conditional-differential}
+and~\ref{thm:conditional-linear} produce no nonzero AES-S-box cyclic
+characteristic for this layer.
+\end{theorem}
+\begin{proof}
+For differences, the identity $L_{\mathrm{D}}^4=\hex{D8}I$ implies that, for every state $x$ and
+every byte coordinate $j$,
+\[
+ (L_{\mathrm{D}}^{4t}x)_j=\hex{D8}^{\,t}x_j.
+\]
+If $x_j\ne0$, the values observed in this coordinate at rounds
+$0,4,8,\ldots,200$ form the complete multiplicative coset $x_jH$.
+Therefore diagonal DDT compatibility of any nonzero closed orbit would
+require at least one entire coset of $H$ to be contained in
+$D_{\rm diag}$. For masks one must use the adjoint with respect to the standard binary dot product used in the AES LAT.  Let $C_{\alpha}\in\mathrm{GL}(8,2)$ denote the binary matrix of multiplication by $\alpha$ in the AES polynomial basis, with least-significant bit corresponding to the coefficient of $1$.  Since four applications of the state layer multiply each byte by $\hex{D8}$, four applications of the backward mask map act on each byte by
+\[
+ A:=C_{\hex{D8}}^{-T},
+\]
+not, in general, by the byte map $a\mapsto\hex{D8}^{-1}a$ in the same polynomial basis.  These maps are different because $C_{\hex{D8}}$ is not symmetric.  Exact enumeration of the standard-basis action of $A$ partitions the $255$ nonzero masks into five orbits of length $51$.  Taking the least element of each orbit as representative, the representatives and LAT-support intersections are
+\[
+\begin{array}{c|ccccc}
+\text{orbit representative}&\hex{01}&\hex{02}&\hex{05}&\hex{06}&\hex{08}\\
+\hline
+|\mathcal O_A(a)\cap L_{\rm diag}|&46&47&49&45&47.
+\end{array}
+\]
+Thus the sorted intersection multiset is $\{45,46,47,47,49\}$.
+
+For differences, the exact intersections of $D_{\rm diag}$ with the five multiplicative cosets of $H$ are
+\[
+ 20,\ 25,\ 22,\ 22,\ 27.
+\]
+Every displayed number is strictly less than $51$.  Hence no multiplicative difference coset is contained in $D_{\rm diag}$ and no adjoint mask orbit is contained in $L_{\rm diag}$.  Every nonzero closed state orbit has period $51$, $102$, or $204$ by the exact period classification above, and its four-step subsequence contains a complete difference coset; the corresponding backward-mask four-step subsequence contains a complete $A$-orbit.  Therefore neither diagonal compatibility condition can hold at every active byte and every round.
+\end{proof}
+
+\begin{remark}
+This is a negative and therefore security-calibrated conclusion: the
+simple diagonal-orbit bridge is empty for the AES S-box. It neither proves
+nor disproves the existence of unrestricted cyclic characteristics with
+S-box transitions $a\mapsto b$ where $b\ne a$. Those require a full
+DDT/LAT-aware search.
+\end{remark}
+
+\begin{remark}[Why the compatibility qualifier is essential]\label{rem:compatibility}
+A relation $T^e x=x$ alone does not describe a differential trail of a nonlinear SPN. In a general trail, the S-box output difference $b_i$ need not equal the input difference $a_i$, and the recurrence is $a_{i+1}=Tb_i$, not $a_{i+1}=Ta_i$. Therefore $\Delta_h(T)=0$ excludes the orbit-compatible subclass above but does not exclude all cyclic, truncated, or value-compatible differential trails. The corresponding unrestricted quantities require a DDT/LAT-aware MILP, SAT, SMT, or dynamic-programming search. This distinction is part of the theorem, not a limitation hidden in the discussion.
+\end{remark}
+\section{Projective return and mandatory subspace screening}\label{sec:subspace-screening}
+The identity \eqref{eq:L4} is the shortest and potentially most consequential structural relation of the construction. It implies that every $\mathbb F_{2^8}$-linear subspace $U$ satisfies $L^4(U)=U$. This does not by itself yield an invariant-subspace attack on an SPN, because the nonlinear layer, key additions, and round constants generally move or destroy such subspaces. It nevertheless fixes the exact family of linear candidates that a nonlinear analysis must address.
+
+Let $U_0=\hex{33}^{-1}L=I+N$ with $N^4=0$. The Jordan filtration
+\[
+0\subset \ker N\subset\ker N^2\subset\ker N^3\subset\ker N^4=\mathbb F_{2^8}^{16}
+\]
+has field dimensions $4,8,12,16$. Every member is $U_0$-invariant and therefore $L$-invariant up to the scalar $\hex{33}$. These spaces are canonical candidates for affine-coset and partition tests.
+
+\begin{definition}[Nonlinear coset transition]\label{def:coset-transition}
+For a bytewise permutation $S$ and field-linear subspaces $U,W$, a coset transition $U+a\rightarrow W+b$ means
+\[
+S^{\parallel16}(U+a)\subseteq W+b.
+\]
+A four-step subspace trail for a keyed round additionally requires compatibility with the linear layer, the key-addition convention, and all round constants.
+\end{definition}
+
+\begin{definition}[Machine-readable structural screening record]\label{def:screening-record}
+For a field-linear layer \(L\), S-box \(S\), bundle partition \(\Pi\), and round horizon \(R\), the screening record is the ordered object
+\[
+\mathfrak C(L,S,\Pi,R)=(\mathsf{Local},\mathsf{Rec},\mathsf{Act},\mathsf{Compat},\mathsf{Impl}),
+\]
+where every entry carries one of the statuses \texttt{proved}, \texttt{computed}, \texttt{warning}, or \texttt{not-established}.  The mandatory fields are: field and serialization; differential and linear branch numbers; minimal polynomial, projective order, and fixed-space profile; the exact definition and optimum of every activity model; the precise DDT/LAT/BCT compatibility class tested; and the implementation metric actually measured.  A projective order at most the stated round horizon automatically produces a \texttt{warning} requiring nonlinear subspace analysis.  Supplementary Material S1 contains the corresponding JSON record and a schema validator.
+\end{definition}
+
+\paragraph{Construction rule.} The record is constructed by (i) checking the analytic local hypotheses, (ii) computing recurrence invariants with an independent verifier, (iii) solving only explicitly declared support or value-aware models, (iv) recording unperformed analyses as \texttt{not-established}, and (v) emitting machine-readable witnesses and hashes.  No \texttt{computed} field is interpreted as a security theorem unless its model is stated in the manuscript.
+
+
+The present certificate performs the following conservative screening and no more. First, it identifies the complete canonical Jordan filtration. Second, it proves that vector periods do not prevent four-step projective recurrence. Third, the diagonal DDT/LAT test in the next section eliminates one orbit-synchronous one-dimensional compatibility mechanism. It does not classify general coset transitions of Definition~\ref{def:coset-transition}. Accordingly, the layer is not proposed for cipher integration until a dedicated subspace-trail search has either excluded relevant low-dimensional trails or shown how round constants destroy them. This is a central acceptance condition for the candidate, not a cosmetic item of future work.
+
+\section{Cryptographic interpretation and comparison}\label{sec:discussion}
+The algebraic classification provides a screening tool rather than a stand-alone security claim. A scalar relation $L^e=\lambda I$ implies a projective return of every field-linear subspace after $e$ applications, even when ordinary vector periods are much larger. For the concrete layer,
+\[
+L_{\mathrm D}^4=\mathtt{D8}I,\qquad [L_{\mathrm D}]^4=1,
+\]
+whereas its nonzero vector periods are $51$, $102$, and $204$. Thus the factor four describes the nonscalar projective dynamics, while the factor $51$ is generated by the field scalar. This distinction prevents a scalar-extended vector period from being interpreted as complicated projective behavior.
+
+The same data are relevant to invariant-subspace analysis. The Jordan form determines the nested kernels of $(U-I)^j$, and the invariant factors determine every $\dim\ker(L^e-I)$. These spaces do not by themselves establish an invariant-subspace attack, because a complete analysis must include the S-box, round constants, and key addition. They do, however, expose all linear recurrence candidates before an unrestricted nonlinear search.
+
+The local Cauchy matrix has differential and linear branch number five, and the bundle permutation satisfies the forward and inverse dispersion condition required by the wide-trail argument. Hence every four-round value-compatible differential or linear trail has at least $25$ active S-boxes because its support sequence is feasible in the MDS-truncated relaxation whose optimum is $25$. The converse is not asserted: a relaxation witness need not be realizable by byte values or by AES DDT/LAT transitions. The recurrence analysis addresses a different object: activity accumulated along a closed orbit of the isolated linear operator. Theorems~\ref{thm:cyclic-branch-bound}--\ref{thm:aes-no-diagonal-cycles} show that such an orbit must have substantial cumulative bundle activity and that none of the possible nonzero periods is compatible with the simplest diagonal AES S-box transitions. General characteristics with transitions $a\mapsto b$, $a\ne b$, remain outside this restricted result and require a full DDT/LAT-aware search.
+
+\subsection{Serialization and implementation sanity checks}
+Table~\ref{tab:exact-comparison} reports exact invariants of isolated linear operators under one field basis and serialization. AES is included only as a reproducibility reference. Direct scalar-power testing gives projective order eight for the isolated AES operator: powers one, two, and four are nonscalar, while the eighth power is the identity. The same dynamic program applied to AES in the identical four-layer MDS-truncated support model also gives optimum $25$; the comparison therefore shows equality of this coarse activity metric, not superiority of either layer.
+\begin{table}[ht]
+\centering
+\footnotesize
+\caption{Exact isolated-operator invariants under a common serialization.}
+\label{tab:exact-comparison}
+\begin{tabularx}{\textwidth}{@{}Xccccc@{}}
+\toprule
+Layer & branch no. & order & vector periods & proj. order & relaxed activity\\
+\midrule
+AES isolated linear layer & 5 & 8 & $1,2,4,8$ & 8 & 25\\
+Dyadic Cauchy--shear layer & 5 & 204 & $51,102,204$ & 4 & 25\\
+Normalized Cauchy--shear layer & 5 & 4 & $1,2,4$ & 4 & 25\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+A deterministic sample of $500$ generic Cauchy matrices was also embedded with the same permutation. This is retained only as an exploratory sanity check and is moved to the supplementary log. It supplies neither a statistical population claim nor a security comparison with published designs. The scientifically relevant exact comparison is between the scalar return of the structured layer and the absence or presence of such a return in individually certified operators.
+
+\section{Implementation scope}\label{sec:cost}
+The exact binary matrices of the forward and inverse local maps are supplied in Supplementary Material S1. We do not report independent-tree XOR counts as an efficiency comparison, because they ignore common subexpressions and are not comparable with optimized circuits in the modern MDS literature. No implementation advantage is claimed. A separate implementation study would require a stated Boyar--Peralta or equivalent synthesis procedure, optimized forward and inverse straight-line programs, and matched software or hardware benchmarks against AES MixColumns and published lightweight MDS layers.
+
+\section{Limitations and future work}
+The present results classify the isolated linear family and one deliberately restricted class of S-box-compatible cyclic characteristics; they do not constitute complete-cipher cryptanalysis. The scalar relation $L^4=\hex{D8}I$ makes subspace-trail analysis particularly urgent: every field-linear subspace returns projectively after four applications, and only the nonlinear layer, constants, and key addition can determine whether this recurrence develops into a distinguisher. The next stages are therefore: (i) unrestricted DDT/LAT/BCT-aware MILP, SAT, SMT, or dynamic-programming searches with explicit round boundaries \cite{Mouha2011,Sun2014,SasakiTodo2017}; (ii) nonlinear subspace-trail analysis including the S-box, round constants, and key addition; (iii) classification for larger groups $V=\F_2^m$ and automorphisms of order greater than two; (iv) basis-dependent straight-line optimization followed by software and ASIC/FPGA evaluation \cite{BoyarPeralta2010,BeierleKranzLeander2016}; and (v) an expanded matched benchmark containing published diffusion layers with fully reproduced serialization and test vectors.
+
+\section{Conclusion}
+We have proved a family-level projective recurrence theorem and provided a reproducible structural classification of a dyadic Cauchy--MDS shear layer. The local Cauchy matrix is superregular and has differential and linear branch number five. Its dyadic group-algebra structure is stated explicitly: the coefficients are constant on XOR displacements, while no real Walsh--Hadamard transform is used. For the complete 128-bit shear--mix operator, exact finite-field computation gives
+\[
+L^4=\hex{D8}I,\qquad \ord(L)=204,
+\qquad \ord_{\mathrm{PGL}}([L])=4,
+\]
+and the Jordan form is $J_4(\hex{33})^{\oplus4}$. The resulting nonzero vector periods are $51$, $102$, and $204$ with explicitly counted populations.
+
+The propagation and recurrence conclusions have been kept separate. An exhaustive branch-number activity relaxation has exact optimum $25$ over four S-box layers, with an explicit mask witness printed in the paper. This supplies a rigorous truncated lower bound, but not a value-compatible trail attaining $25$. Closed linear orbits satisfy cumulative activity bounds, but exact AES S-box computation excludes only the diagonal orbit-compatible subclass. General transitions $a\mapsto b$ with $a\ne b$, boomerang transitions, nonlinear subspace trails, and keyed-round effects remain unresolved.
+
+The main design lesson is therefore balanced. The construction provides optimal local diffusion and unusually transparent algebraic certification, but the same transparency reveals a projective return after four steps. That return is neither a security advantage nor, by itself, an attack; it is a concrete structural condition that a subsequent nonlinear design must withstand. The article should thus be read as a rigorous pre-integration screening study and as a reproducible workflow for rejecting or advancing structured diffusion candidates.
+
+\section{Evidence map}\label{sec:evidence-map}
+\begin{table}[ht]
+\centering
+\footnotesize
+\caption{Status of the principal claims.}
+\begin{tabularx}{\textwidth}{p{0.30\textwidth}p{0.18\textwidth}X}
+\toprule
+Claim & Evidence type & Verification location\\
+\midrule
+Cauchy superregularity and branch number five & analytic proof & Theorem~\ref{thm:mds}\\
+$M^{-1}=\mathtt{97}M$ and $L^4=\mathtt{D8}I$ & exact finite-field computation & Appendix~\ref{app:certificate}\\
+Jordan form and exact period populations & analytic deduction from certified ranks & Theorem~\ref{thm:WH-jordan} and Corollary~\ref{thm:WHspectrum}\\
+Four-layer relaxed activity value $25$ & two independent complete optimizations plus a separate feasibility checker & Theorem~\ref{thm:wide25} and Appendix~\ref{app:activity-witness}\\
+AES diagonal DDT/LAT exclusion & exhaustive exact computation plus multiplicative-coset and binary-adjoint-orbit arguments & Theorem~\ref{thm:aes-no-diagonal-cycles}\\
+Random-Cauchy comparison & exploratory experiment & supplementary log only\\
+Implementation efficiency & not claimed; exact binary matrices supplied & Section~\ref{sec:cost}\\
+General nonlinear subspace resistance & not established & Section~\ref{sec:subspace-screening}\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\appendix
+\section{Exact finite-field certificate}\label{app:certificate}
+This appendix specifies the machine-checkable claims used in the text. All arithmetic is exact in $\F_2[z]/(z^8+z^4+z^3+z+1)$; no floating-point computation is used. The verification package records the software version, command line, random seed, SHA-256 digest of every source and output file, and a plain-text log. The required checks are:
+\begin{enumerate}[label=(A\arabic*)]
+\item construct $\F_{2^8}$ with modulus $\hex{11B}$ and verify $(\hex{04}+a)^{-1}$ for $a=0,1,2,3$;
+\item enumerate all $69$ square minors of $M$ and verify that each determinant is nonzero;
+\item verify $M^2=\hex{72}I_4$, $M^{-1}=\hex{97}M$, and $\hex{72}\cdot\hex{97}=1$;
+\item construct the $16\times16$ field matrix and the $128\times128$ binary representative of $L$ under the stated row-major serialization;
+\item verify $L^4=\hex{D8}I$, the nonscalarity of $L,L^2,L^3$, and $\ord(\hex{33})=\ord(\hex{D8})=51$;
+\item compute $\dim_{\F_2}\ker(L^{51}-I)=32$, $\dim_{\F_2}\ker(L^{102}-I)=64$, and $\dim_{\F_2}\ker(L^{204}-I)=128$;
+\item construct the complete AES DDT and LAT; intersect the diagonal DDT support with the five multiplicative cosets of $\langle\hex{D8}\rangle$; construct $C_{\hex{D8}}^{-T}$ in the AES polynomial basis and intersect the diagonal LAT support with its five nonzero length-$51$ orbits;
+\item enumerate all $252$ admissible parameters directly, verify projective order four, and reproduce Table~\ref{tab:gamma-family}.
+\end{enumerate}
+
+The following self-contained core illustrates the finite-field conventions. The release contains the full matrix, rank, DDT/LAT, and dynamic-programming routines together with assertions and expected output.
+\begin{lstlisting}[caption={Core finite-field operations used by the certificate.},label={lst:gf-core}]
+MOD = 0x11B
+
+def gf_mul(a, b):
+    r = 0
+    for _ in range(8):
+        if b & 1:
+            r ^= a
+        b >>= 1
+        a <<= 1
+        if a & 0x100:
+            a ^= MOD
+    return r & 0xFF
+
+def gf_pow(a, n):
+    r = 1
+    while n:
+        if n & 1:
+            r = gf_mul(r, a)
+        a = gf_mul(a, a)
+        n >>= 1
+    return r
+
+def gf_inv(a):
+    if a == 0:
+        raise ZeroDivisionError("zero has no inverse")
+    return gf_pow(a, 254)
+
+h = [gf_inv(0x04 ^ a) for a in range(4)]
+assert h == [0xCB, 0x52, 0x7B, 0xD1]
+assert gf_mul(0x72, 0x97) == 1
+assert gf_pow(0x33, 51) == 1
+assert gf_pow(0xD8, 51) == 1
+\end{lstlisting}
+
+The certificate is not used to replace the analytic Cauchy determinant proof. It verifies the instance-specific byte identities, ranks, diagonal supports, and the exact optimum of the explicitly defined activity relaxation. Optimality is computed twice from independently written binary linear formulations with different variable layouts and constraint-generation code. Both return objective value $25$ and the first reproduces the printed witness. The witness checker is a third, simpler program and verifies feasibility only.
+
+\section{Four-layer activity certificate}\label{app:activity-witness}
+The binary masks in \eqref{eq:activity-witness} use bit position $4i+j$ for byte $(i,j)$. One optimal certificate is
+\[
+\begin{array}{c|c|c}
+r & x^{(r)} & \operatorname{wt}(x^{(r)})\\
+\hline
+0&\mathtt{2800}&2\\
+1&\mathtt{5A5A}&8\\
+2&\mathtt{EEEE}&12\\
+3&\mathtt{5004}&3
+\end{array}
+\]
+with post-mixing, pre-permutation masks
+\[
+y^{(0)}=\mathtt{AAAA},\qquad
+y^{(1)}=\mathtt{7BDE},\qquad
+y^{(2)}=\mathtt{A004}.
+\]
+The verifier checks
+\[
+x^{(r+1)}_{i,j\oplus i}=y^{(r)}_{i,j}
+\qquad (r=0,1,2)
+\]
+and, independently for each column, either zero-to-zero propagation or the inequality
+\[
+\operatorname{wt}(x^{(r)}_{\cdot,j})+
+\operatorname{wt}(y^{(r)}_{\cdot,j})\ge5.
+\]
+The four input-mask weights sum to $25$. For the lower bound, the complete binary optimization model is solved to proven optimality by two independently written MILP formulations with different variable numbering and constraint-generation code. Both return objective value $25$. The lightweight witness checker reads the solver-independent path and verifies all listed constraints; it certifies feasibility and hence the upper bound, whereas the two complete optimization models establish the lower bound under the stated solver optimality certificates. The relation is a branch-number relaxation, not the exact support relation of $M$; therefore the certificate proves the exact relaxed optimum and a valid lower bound for realizable trails, but not realizability of the displayed support sequence by byte values.
+
+\section{Reproducibility and submission protocol}\label{app:reproducibility}
+The supplementary archive is designed to be checked in a clean Python environment.  The analytical proofs in the manuscript do not depend on the software.  Computation is used only for the instance-specific finite-field identities, the binary rank/nullity data, the direct scan of all admissible parameters, the isolated AES reference calculation, and the exact optimum in the explicitly stated support relaxation.
+
+The archive contains the following files; the names below are exact and are also checked by \texttt{verify\_release.py}.
+\begin{center}
+\scriptsize
+\begin{tabularx}{\linewidth}{@{}>{\ttfamily\raggedright\arraybackslash}p{0.40\linewidth}>{\raggedright\arraybackslash}X@{}}
+\toprule
+\normalfont File & Purpose\\
+\midrule
+verify\_full\_certificate.py & exact field arithmetic, local MDS identities, the representative full operator, binary ranks/nullities, periods, and restricted AES S-box supports\\
+verify\_family.py & direct scan of all $252$ admissible parameters $\gamma\in\F_{2^8}\setminus V$; no spectral conclusion is inferred from row/column permutation equivalence\\
+verify\_aes\_serialization.py & isolated AES linear operator with row-major input and row-major output coordinates, including test vector, order, periods, and fixed-space dimensions\\
+activity\_milp\_forward\_logged.py & first complete MILP formulation; writes a full HiGHS log with primal objective $25$, dual bound $25$, and zero gap\\
+activity\_milp\_independent.py & independently generated second MILP formulation with a different indexing and constraint-construction path\\
+verify\_activity\_witness.py & solver-independent feasibility checker for the printed weight-$25$ witness\\
+verify\_release.py & checks the required file set, validates JSON against the schema, compares headline values, and verifies the SHA-256 manifest\\
+README.md & clean-environment commands, evidence separation, and expected headline outputs\\
+aes\_serialization\_results.json & row-major AES test vector, order, fixed-space dimensions, and period counts\\
+family\_summary.json, gamma\_family.csv & aggregate and parameter-by-parameter results for all $252$ admissible parameters\\
+full\_certificate\_results.json & machine-readable output for the representative instance\\
+lat\_adjoint\_orbits.json & binary matrix $C_{\hex{D8}}^{-T}$, all five nonzero mask orbits, representatives, and LAT-support intersection counts\\
+screening\_record.json & status-labelled record separating proved, computed, warning, and not-established claims\\
+screening\_schema.json & JSON schema for the screening record\\
+solver\_forward\_full.log, solver\_independent\_full.log & complete optimization logs retained with the release\\
+requirements.txt & tested Python dependencies\\
+SHA256SUMS & release-generated integrity digests for every archive file except the manifest itself\\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+The clean-environment command sequence is
+\begin{lstlisting}[language=bash,basicstyle=\ttfamily\scriptsize]
+python -m venv .venv
+. .venv/bin/activate              # Windows: .venv\\Scripts\\activate
+python -m pip install -r requirements.txt
+python verify_full_certificate.py
+python verify_family.py
+python verify_aes_serialization.py
+python activity_milp_forward_logged.py
+python activity_milp_independent.py
+python verify_activity_witness.py
+python verify_release.py
+\end{lstlisting}
+The expected headline outputs are recorded in \texttt{README.md}.  The two optimization programs establish the lower bound only through their proven optimality reports; the witness checker establishes feasibility and hence the upper bound.  The resulting equality $25$ is therefore a computational theorem for the stated relaxation, not an assertion of a realizable AES S-box characteristic.
+
+\section*{Statements and declarations}
+\textbf{Funding.} The authors declare that no specific external funding was received for this study.
+
+\textbf{Conflict of interest.} The authors declare that they have no conflict of interest.
+
+\textbf{Data and code availability.} All finite-field verification scripts, the two independent activity-optimization implementations, the witness checker, expected outputs, and SHA-256 digests are supplied as supplementary material with the submission. An immutable public archival identifier will be added after submission or acceptance, subject to the journal policy. AIMS uses single-blind review, so the submitted manuscript contains the author information.
+
+\textbf{Author contributions.} Both authors contributed to the conception of the study, the mathematical analysis, verification of the results, and preparation of the manuscript.
+
+\textbf{Use of generative AI.} The authors are responsible for all mathematical statements, computations, and final wording. Any language-assistance tools used during preparation did not replace author verification of the scientific content.
+
+\begin{thebibliography}{99}
+
+\bibitem{Berger2014}
+T.~P. Berger,
+Construction of dyadic MDS matrices for cryptographic applications,
+\emph{arXiv preprint arXiv:1402.0972}, 2014.
+doi: \href{https://doi.org/10.48550/arXiv.1402.0972}{\nolinkurl{10.48550/arXiv.1402.0972}}.
+
+\bibitem{GuptaPandeyRay2019}
+K.~C. Gupta, S.~K. Pandey and I.~G. Ray,
+Cryptographically significant MDS matrices,
+\emph{Advances in Mathematics of Communications},
+13 (2019), 747--819.
+doi: \href{https://doi.org/10.3934/amc.2019045}{\nolinkurl{10.3934/amc.2019045}}.
+
+\bibitem{MartinezPllahaKelley2025}
+M.~Martinez, T.~Pllaha and C.~A. Kelley,
+Codes based on dyadic matrices and their generalizations,
+\emph{Advances in Mathematics of Communications}, 19 (2025), 1277--1300.
+doi: \href{https://doi.org/10.3934/amc.2024054}{\nolinkurl{10.3934/amc.2024054}}.
+
+
+\bibitem{BeierleCanteaut2017}
+C.~Beierle, A.~Canteaut, G.~Leander and Y.~Rotella,
+Proving resistance against invariant attacks:
+how to choose the round constants,
+in: \emph{Advances in Cryptology---CRYPTO 2017},
+LNCS 10402, Springer, 2017, pp.~647--678. doi: \href{https://doi.org/10.1007/978-3-319-63688-7_22}{\nolinkurl{10.1007/978-3-319-63688-7_22}}.
+
+\bibitem{BeierleKranzLeander2016}
+C.~Beierle, T.~Kranz and G.~Leander,
+Lightweight multiplication in \(\mathrm{GF}(2^n)\) with applications
+to MDS matrices,
+in: \emph{Advances in Cryptology---CRYPTO 2016},
+LNCS 9814, Springer, 2016, pp.~625--653. doi: \href{https://doi.org/10.1007/978-3-662-53018-4_23}{\nolinkurl{10.1007/978-3-662-53018-4_23}}.
+
+\bibitem{BouraCanteautCoggia2019}
+C.~Boura, A.~Canteaut and D.~Coggia,
+A general proof framework for recent AES distinguishers,
+\emph{IACR Transactions on Symmetric Cryptology},
+2019(1), 170--191, 2019. doi: \href{https://doi.org/10.13154/tosc.v2019.i1.170-191}{\nolinkurl{10.13154/tosc.v2019.i1.170-191}}.
+
+\bibitem{BoyarPeralta2010}
+J.~Boyar and R.~Peralta,
+A new combinational logic minimization technique with applications to
+cryptology,
+in: \emph{Experimental Algorithms---SEA 2010},
+LNCS 6049, Springer, 2010, pp.~178--189. doi: \href{https://doi.org/10.1007/978-3-642-13193-6_16}{\nolinkurl{10.1007/978-3-642-13193-6_16}}.
+
+\bibitem{DaemenRijmenWide2001}
+J.~Daemen and V.~Rijmen,
+The wide trail design strategy,
+in: \emph{Cryptography and Coding 2001}, Lecture Notes in Computer Science, vol.~2260, Springer, 2001, pp.~222--238.
+doi: \href{https://doi.org/10.1007/3-540-45325-3_20}{\nolinkurl{10.1007/3-540-45325-3_20}}.
+
+\bibitem{DaemenRijmen2002}
+J.~Daemen and V.~Rijmen,
+\emph{The Design of Rijndael: AES---The Advanced Encryption Standard},
+Springer, Berlin, 2002.
+
+\bibitem{FIPS197}
+National Institute of Standards and Technology,
+\emph{Advanced Encryption Standard (AES)},
+FIPS PUB 197-upd1, 2023.
+
+\bibitem{GrassiRechbergerRonjom2016}
+L.~Grassi, C.~Rechberger and S.~R{\o}njom,
+Subspace trail cryptanalysis and its applications to AES,
+\emph{IACR Transactions on Symmetric Cryptology},
+2016(2), 192--225, 2017. doi: \href{https://doi.org/10.13154/tosc.v2016.i2.192-225}{\nolinkurl{10.13154/tosc.v2016.i2.192-225}}.
+
+\bibitem{GrassiRechbergerSchofnegger2021}
+L.~Grassi, C.~Rechberger and M.~Schofnegger,
+Proving resistance against infinitely long subspace trails:
+how to choose the linear layer,
+\emph{IACR Transactions on Symmetric Cryptology},
+2021(2), 314--352, 2021. doi: \href{https://doi.org/10.46586/tosc.v2021.i2.314-352}{\nolinkurl{10.46586/tosc.v2021.i2.314-352}}.
+
+\bibitem{GuptaPandeyVenkateswarlu2019}
+K.~C. Gupta, S.~K. Pandey and A.~Venkateswarlu,
+Almost involutory recursive MDS diffusion layers,
+\emph{Designs, Codes and Cryptography},
+87, 609--626, 2019. doi: \href{https://doi.org/10.1007/s10623-018-0582-2}{\nolinkurl{10.1007/s10623-018-0582-2}}.
+
+\bibitem{GuptaRay2013}
+K.~C. Gupta and I.~G. Ray,
+On constructions of involutory MDS matrices,
+in: \emph{Progress in Cryptology---AFRICACRYPT 2013},
+LNCS 7918, Springer, 2013, pp.~43--60. doi: \href{https://doi.org/10.1007/978-3-642-38553-7_3}{\nolinkurl{10.1007/978-3-642-38553-7_3}}.
+
+\bibitem{JunodVaudenay2004}
+P.~Junod and S.~Vaudenay,
+Perfect diffusion primitives for block ciphers:
+building efficient MDS matrices,
+in: \emph{Selected Areas in Cryptography---SAC 2004},
+LNCS 3357, Springer, 2005, pp.~84--99. doi: \href{https://doi.org/10.1007/978-3-540-30564-4_6}{\nolinkurl{10.1007/978-3-540-30564-4_6}}.
+
+\bibitem{LeanderAbdelraheem2011}
+G.~Leander, M.~A. Abdelraheem, H.~AlKhzaimi and E.~Zenner,
+A cryptanalysis of PRINTcipher: the invariant subspace attack,
+in: \emph{Advances in Cryptology---CRYPTO 2011},
+LNCS 6841, Springer, 2011, pp.~206--221. doi: \href{https://doi.org/10.1007/978-3-642-22792-9_12}{\nolinkurl{10.1007/978-3-642-22792-9_12}}.
+
+\bibitem{LeanderTezcanWiemer2018}
+G.~Leander, C.~Tezcan and F.~Wiemer,
+Searching for subspace trails and truncated differentials,
+\emph{IACR Transactions on Symmetric Cryptology},
+2018(1), 74--100, 2018. doi: \href{https://doi.org/10.13154/tosc.v2018.i1.74-100}{\nolinkurl{10.13154/tosc.v2018.i1.74-100}}.
+
+\bibitem{LiWang2016}
+Y.~Li and M.~Wang,
+On the construction of lightweight circulant involutory MDS matrices,
+in: \emph{Fast Software Encryption---FSE 2016},
+LNCS 9783, Springer, 2016, pp.~121--139. doi: \href{https://doi.org/10.1007/978-3-662-52993-5_7}{\nolinkurl{10.1007/978-3-662-52993-5_7}}.
+
+\bibitem{LiWangNearMDS2017}
+C.~Li and Q.~Wang,
+Design of lightweight linear diffusion layers from near-MDS matrices,
+\emph{IACR Transactions on Symmetric Cryptology},
+2017(1), 129--155, 2017. doi: \href{https://doi.org/10.13154/tosc.v2017.i1.129-155}{\nolinkurl{10.13154/tosc.v2017.i1.129-155}}.
+
+\bibitem{LidlNiederreiter1997}
+R.~Lidl and H.~Niederreiter,
+\emph{Finite Fields}, 2nd ed.,
+Cambridge University Press, Cambridge, 1997.
+
+\bibitem{LiuSim2016}
+M.~Liu and S.~M. Sim,
+Lightweight MDS generalized circulant matrices,
+in: \emph{Fast Software Encryption---FSE 2016},
+LNCS 9783, Springer, 2016, pp.~101--120. doi: \href{https://doi.org/10.1007/978-3-662-52993-5_6}{\nolinkurl{10.1007/978-3-662-52993-5_6}}.
+
+\bibitem{MacWilliamsSloane1977}
+F.~J. MacWilliams and N.~J. A. Sloane,
+\emph{The Theory of Error-Correcting Codes},
+North-Holland, Amsterdam, 1977.
+
+\bibitem{Mouha2011}
+N.~Mouha, Q.~Wang, D.~Gu and B.~Preneel,
+Differential and linear cryptanalysis using mixed-integer linear programming,
+in: \emph{Information Security and Cryptology---Inscrypt 2011},
+LNCS 7537, Springer, 2012, pp.~57--76. doi: \href{https://doi.org/10.1007/978-3-642-34704-7_5}{\nolinkurl{10.1007/978-3-642-34704-7_5}}.
+
+\bibitem{Sajadieh2012}
+M.~Sajadieh, M.~Dakhilalian, H.~Mala and P.~Sepehrdad,
+Recursive diffusion layers for block ciphers and hash functions,
+in: \emph{Fast Software Encryption---FSE 2012},
+LNCS 7549, Springer, 2012, pp.~385--401. doi: \href{https://doi.org/10.1007/978-3-642-34047-5_22}{\nolinkurl{10.1007/978-3-642-34047-5_22}}.
+
+\bibitem{SasakiTodo2017}
+Y.~Sasaki and Y.~Todo,
+New algorithm for modeling S-box in MILP based differential and division
+trail search,
+in: \emph{Advances in Cryptology---ASIACRYPT 2017},
+LNCS 10624, Springer, 2017, pp.~150--179. doi: \href{https://doi.org/10.1007/978-3-319-69284-5_11}{\nolinkurl{10.1007/978-3-319-69284-5_11}}.
+
+\bibitem{Subroto2023}
+R.~C. Subroto,
+An algebraic approach to symmetric linear layers in cryptographic primitives,
+\emph{Cryptography and Communications},
+15, 1053--1067, 2023. doi: \href{https://doi.org/10.1007/s12095-023-00630-w}{\nolinkurl{10.1007/s12095-023-00630-w}}.
+
+\bibitem{Subterranean2020}
+J.~Daemen, P.~M. C. Massolino and Y.~Rotella,
+The Subterranean 2.0 cipher suite,
+\emph{IACR Transactions on Symmetric Cryptology},
+2020(S1), 262--294, 2020. doi: \href{https://doi.org/10.13154/tosc.v2020.iS1.262-294}{\nolinkurl{10.13154/tosc.v2020.iS1.262-294}}.
+
+\bibitem{Sun2014}
+S.~Sun, L.~Hu, P.~Wang, K.~Qiao, X.~Ma and L.~Song,
+Automatic security evaluation and (de)-composition of cryptographic
+primitives,
+in: \emph{Advances in Cryptology---CRYPTO 2014},
+LNCS 8616, Springer, 2014, pp.~283--302. doi: \href{https://doi.org/10.1007/978-3-662-45611-8_9}{\nolinkurl{10.1007/978-3-662-45611-8_9}}.
+
+\bibitem{WangWu2024}
+B.~Wang and W.~Wu,
+Security analysis of P-SPN schemes against invariant subspace attack
+with inactive S-boxes,
+\emph{Designs, Codes and Cryptography},
+92, 3753--3782, 2024. doi: \href{https://doi.org/10.1007/s10623-024-01465-z}{\nolinkurl{10.1007/s10623-024-01465-z}}.
+
+\bibitem{ZhouWangSun2018}
+L.~Zhou, L.~Wang and Y.~Sun,
+On efficient constructions of lightweight MDS matrices,
+\emph{IACR Transactions on Symmetric Cryptology},
+2018(1), 180--200, 2018. doi: \href{https://doi.org/10.13154/tosc.v2018.i1.180-200}{\nolinkurl{10.13154/tosc.v2018.i1.180-200}}.
+
+
+\bibitem{Kumar2025}
+Y.~Kumar,
+Construction of all MDS and involutory MDS matrices,
+\emph{Advances in Mathematics of Communications}, 19 (2025), 989--1014.
+doi: \href{https://doi.org/10.3934/amc.2024033}{\nolinkurl{10.3934/amc.2024033}}.
+
+\bibitem{MousaviEsmaeiliGulliver2025}
+M.~Mousavi, M.~Esmaeili and T.~A. Gulliver,
+Circulant, circulant-like and orthogonal MDS generalized Cauchy matrices,
+\emph{Advances in Mathematics of Communications}, 19 (2025), 716--735.
+doi: \href{https://doi.org/10.3934/amc.2024020}{\nolinkurl{10.3934/amc.2024020}}.
+
+\bibitem{GuptaPandeySamanta2026}
+K.~C. Gupta, S.~K. Pandey and S.~Samanta,
+On the direct construction of MDS and Near-MDS matrices,
+\emph{Advances in Mathematics of Communications}, forthcoming, 2026.
+doi: \href{https://doi.org/10.3934/amc.2026030}{\nolinkurl{10.3934/amc.2026030}}.
+
+\bibitem{Wang2022}
+S.~Wang,
+On construction of lightweight MDS matrices,
+\emph{Advances in Mathematics of Communications}, 18 (2024), 1307--1332.
+doi: \href{https://doi.org/10.3934/amc.2022094}{\nolinkurl{10.3934/amc.2022094}}.
+
+\bibitem{Wang2023}
+S.~Wang,
+Four by four MDS matrices with the fewest XOR gates in the literature,
+\emph{Advances in Mathematics of Communications}, 17 (2023), 1510--1525.
+doi: \href{https://doi.org/10.3934/amc.2021025}{\nolinkurl{10.3934/amc.2021025}}.
+
+\end{thebibliography}
+\end{document}

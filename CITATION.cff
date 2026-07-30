@@ -1,0 +1,27 @@
+cff-version: 1.2.0
+message: "If you use this software or its verification data, please cite this release and the associated manuscript."
+title: "Reproducibility package for Four-step projective recurrence in a dyadic Cauchy-MDS shear layer"
+type: software
+authors:
+  - family-names: "Episkoposian"
+    given-names: "Sergo A."
+  - family-names: "Grigoryan"
+    given-names: "Svetlana A."
+version: 1.0.1
+date-released: 2026-07-30
+license: MIT
+repository-code: "https://github.com/USERNAME/dyadic-cauchy-shear-screening"
+keywords:
+  - dyadic matrix
+  - Cauchy-MDS matrix
+  - diffusion layer
+  - finite fields
+  - projective recurrence
+  - reproducible cryptography
+abstract: >-
+  Exact verification code and machine-readable certificates for a dyadic
+  Cauchy-MDS shear layer. The package directly scans all 252 admissible
+  parameters, verifies the representative Jordan and period data, checks an
+  isolated AES linear reference under a coherent row-major serialization, and
+  reproduces two independent MILP computations of the exact value 25 in the
+  stated MDS-support relaxation.

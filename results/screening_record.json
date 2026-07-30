@@ -1,0 +1,23 @@
+{
+  "activity": {
+    "statement": "Exact optimum 25 only in the declared abstract MDS-support relaxation; two independent MILP formulations",
+    "status": "computed"
+  },
+  "compatibility": {
+    "statement": "Diagonal AES DDT class excluded by multiplicative cosets; diagonal AES LAT class excluded by standard-basis binary-adjoint orbits; unrestricted DDT/LAT/BCT and nonlinear subspace trails not established",
+    "status": "not-established"
+  },
+  "implementation": {
+    "statement": "Algebraic inverse relation verified; optimized XOR/depth, software, FPGA and ASIC costs not claimed",
+    "status": "not-established"
+  },
+  "layer": "dyadic Cauchy-MDS shear, gamma=04, AES field, row-major serialization",
+  "local": {
+    "statement": "Cauchy superregularity; differential and linear branch number 5",
+    "status": "proved"
+  },
+  "recurrence": {
+    "statement": "Family theorem L_gamma^4=s(gamma)^4 I; projective order exactly 4 verified directly for all 252 admissible parameters",
+    "status": "warning"
+  }
+}

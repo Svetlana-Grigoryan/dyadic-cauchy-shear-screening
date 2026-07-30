@@ -1,0 +1,1 @@
+{"admissible_parameters": 252, "distinct_cosets": 63, "projective_order": 4, "scalar_order_distribution": {"15": 1, "17": 3, "255": 33, "5": 2, "51": 12, "85": 12}}

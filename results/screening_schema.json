@@ -1,0 +1,14 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "type":"object",
+  "required":["layer","local","recurrence","activity","compatibility","implementation"],
+  "properties":{
+    "layer":{"type":"string"},
+    "local":{"$ref":"#/$defs/item"},
+    "recurrence":{"$ref":"#/$defs/item"},
+    "activity":{"$ref":"#/$defs/item"},
+    "compatibility":{"$ref":"#/$defs/item"},
+    "implementation":{"$ref":"#/$defs/item"}
+  },
+  "$defs":{"item":{"type":"object","required":["status","statement"],"properties":{"status":{"enum":["proved","computed","warning","not-established"]},"statement":{"type":"string"}}}}
+}
